@@ -20,7 +20,7 @@
       <p class="tagline">From Mogwai to Moon</p>
 
       <!-- TODO: Replace with your real Pump.fun URL after launch -->
-      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px;">
+      <div id="heroButtons" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px;">
         <a class="btn" href="https://pump.fun/coin/PASTE_YOUR_CONTRACT_ADDRESS" target="_blank" rel="noopener">
           Buy on Pump.fun
         </a>
@@ -60,9 +60,9 @@
       <!-- Edit the LAUNCH_AT value below to your real launch time (ISO8601: YYYY-MM-DDTHH:MM:SSZ) -->
       <div class="card" style="text-align:center;">
         <div id="countdownTimer" style="font-size: clamp(20px, 6vw, 48px); font-weight: 800; letter-spacing: 1px; margin: 8px 0 6px;">
-          30d : 00h : 00m : 00s
+          00d : 00h : 00m : 00s
         </div>
-        <div class="placeholder">Set <code>LAUNCH_AT</code> in the script to your time. Example: 2025-11-7T18:00:00Z</div>
+        <div class="placeholder">Set <code>LAUNCH_AT</code> in the script to your time. Example: 2025-11-15T18:00:00Z</div>
       </div>
     </section>
 
@@ -85,7 +85,7 @@
     </section>
 
     <footer class="footer">
-      <small>© <span id="year"></span> $GIZMO. Fan-made meme content — not affiliated with any film IP. </small>
+      <small>© <span id="year"></span> $GIZMO. Fan-made meme content — not affiliated with any film IP. Replace images/text as needed.</small>
     </footer>
   </div>
 
@@ -115,5 +115,62 @@
     }
     loadHolders();
   </script>
+
+  <script>
+    // === CONFIG: Set your actual launch time here ===
+    // Use UTC 'Z' format OR local with offset, e.g. '2025-12-31T00:00:00Z' or '2025-12-30T19:00:00-05:00'
+    const LAUNCH_AT = window.LAUNCH_AT || '2025-12-31T00:00:00Z';
+
+    // Elements
+    const stickyBuy = document.getElementById('stickyBuy');
+    const heroButtons = document.getElementById('heroButtons');
+    const countdownEl = document.getElementById('countdownTimer');
+
+    function parseLaunchTime(str){
+      // Try exact parse; browsers handle ISO8601 reliably
+      const t = Date.parse(str);
+      if (!isNaN(t)) return new Date(t);
+      // Fallback: if user pasted like '2025/12/31 19:00', treat as local
+      const t2 = new Date(str);
+      if (!isNaN(t2.getTime())) return t2;
+      return null;
+    }
+
+    function updateCountdown(){
+      const targetDate = parseLaunchTime(LAUNCH_AT);
+      if (!targetDate){
+        if (countdownEl) countdownEl.textContent = 'Set a valid LAUNCH_AT';
+        // ensure buttons hidden if invalid date
+        if (stickyBuy) stickyBuy.classList.add('hidden');
+        if (heroButtons) heroButtons.classList.add('hidden');
+        return;
+      }
+
+      const now = new Date();
+      const diff = Math.max(0, targetDate.getTime() - now.getTime());
+
+      const d = Math.floor(diff / (1000*60*60*24));
+      const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+      const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+      const s = Math.floor((diff % (1000*60)) / 1000);
+
+      if (countdownEl) countdownEl.textContent =
+        String(d).padStart(2,'0')+'d : '+String(h).padStart(2,'0')+'h : '+String(m).padStart(2,'0')+'m : '+String(s).padStart(2,'0')+'s';
+
+      if (diff <= 0) {
+        if (stickyBuy) stickyBuy.classList.remove('hidden');
+        if (heroButtons) heroButtons.classList.remove('hidden');
+        if (countdownEl) countdownEl.textContent = 'LAUNCHED 🚀';
+        clearInterval(timer);
+      } else {
+        // Pre-launch: keep hidden
+        if (stickyBuy) stickyBuy.classList.add('hidden');
+        if (heroButtons) heroButtons.classList.add('hidden');
+      }
+    }
+    const timer = setInterval(updateCountdown, 1000);
+    updateCountdown();
+  </script>
+
 </body>
 </html>
