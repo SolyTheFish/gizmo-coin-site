@@ -14,24 +14,35 @@
       <img src="assets/img/banner.png" alt="$GIZMO banner" class="banner">
       <h1 class="title">$GIZMO</h1>
       <p class="tagline">From Mogwai to Moon</p>
-      <!-- Paste your Pump.fun link below when ready -->
-      <!-- <a class="btn" href="PASTE_PUMPFUN_URL_HERE" target="_blank" rel="noopener">Buy on Pump.fun</a> -->
+
+      <!-- TODO: Replace with your real Pump.fun URL after launch -->
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px;">
+        <a class="btn" href="https://pump.fun/coin/PASTE_YOUR_CONTRACT_ADDRESS" target="_blank" rel="noopener">
+          Buy on Pump.fun
+        </a>
+        <!-- Optional: chart link button -->
+        <a class="btn" href="#chart" rel="noopener">View Chart</a>
+      </div>
     </header>
 
     <section class="cards">
       <article class="card">
         <h3>About</h3>
-        <p>Cute retro 80s meme coin powered by community, nostalgia and good vibes. No promises. No roadmaps set in stone. Just memes.</p>
+        <p>Cute retro 80s meme coin powered by community, nostalgia and good vibes. No promises. No financial advice.</p>
       </article>
+
       <article class="card">
         <h3>Gremlinomics</h3>
+        <p><strong>Holders:</strong> <span id="holderCount">—</span></p>
         <div class="kv">
           <div>Total Supply</div><div>1,000,000,000 (example)</div>
           <div>LP</div><div>To be added at launch</div>
           <div>Contract</div><div><span class="placeholder">TBD at launch</span></div>
           <div>Ticker</div><div>$GIZMO</div>
         </div>
+        <p class="placeholder">Tip: add your mint to Netlify env var GIZMO_MINT_ADDRESS to activate holder count.</p>
       </article>
+
       <article class="card">
         <h3>Community</h3>
         <p>Join the squad, post your memes, and help Gizmo reach the moon.</p>
@@ -39,21 +50,54 @@
       </article>
     </section>
 
+    <section id="chart">
+      <h3 class="section-title">Live Chart</h3>
+      <!-- Dexscreener embed 
+           TODO: Replace PASTE_LP_OR_TOKEN with your actual LP or token address after launch.
+           Docs: https://docs.dexscreener.com/widgets/embedding-charts
+      -->
+      <div class="iframe-wrap">
+        <iframe id="dexChart" src="https://dexscreener.com/solana/PASTE_LP_OR_TOKEN?embed=1&theme=dark" allow="clipboard-write; clipboard-read"></iframe>
+      </div>
+    </section>
+
     <section>
-      <h3>Meme Templates</h3>
+      <h3 class="section-title">Media</h3>
       <div class="gallery">
-        <img src="assets/img/meme_square_1080.png" alt="Square meme template">
-        <img src="assets/img/meme_portrait_1080x1350.png" alt="Portrait meme template">
         <img src="assets/img/logo.png" alt="$GIZMO logo">
       </div>
     </section>
 
     <footer class="footer">
-      <small>© {year} $GIZMO. This is fan-made meme content — not affiliated with any film IP. Replace images/text as needed.</small>
+      <small>© <span id="year"></span> $GIZMO. Fan-made meme content — not affiliated with any film IP. Replace images/text as needed.</small>
     </footer>
   </div>
+
+  <!-- Sticky mobile Buy CTA -->
+  <a class="btn" id="stickyBuy" href="https://pump.fun/coin/PASTE_YOUR_CONTRACT_ADDRESS" target="_blank" rel="noopener">
+    Buy $GIZMO
+  </a>
+
   <script>
-    document.querySelector('.footer small').innerHTML = document.querySelector('.footer small').innerHTML.replace('{year}', new Date().getFullYear());
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Holder count loader (calls Netlify Function)
+    async function loadHolders(){
+      try{
+        const r = await fetch('/.netlify/functions/gizmo-holders');
+        const j = await r.json();
+        const el = document.getElementById('holderCount');
+        if(!el) return;
+        el.textContent = (j && typeof j.holders === 'number')
+          ? j.holders.toLocaleString()
+          : (j && j.holders) ? j.holders : 'n/a';
+      }catch(e){
+        const el = document.getElementById('holderCount');
+        if(el) el.textContent = 'n/a';
+      }
+    }
+    loadHolders();
   </script>
 </body>
 </html>
